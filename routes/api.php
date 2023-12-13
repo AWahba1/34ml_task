@@ -15,4 +15,4 @@ use App\Models\Product;
 |
 */
 
-Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
