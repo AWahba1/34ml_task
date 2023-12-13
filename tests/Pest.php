@@ -1,5 +1,9 @@
 <?php
 
+use Database\Factories\ProductFactory;
+use Database\Factories\VariantFactory;
+use Database\Factories\OptionFactory;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -15,6 +19,8 @@ uses(
     Tests\TestCase::class,
     // Illuminate\Foundation\Testing\RefreshDatabase::class,
 )->in('Feature');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -42,7 +48,14 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+
+function createProductWithDetails($averageRating, $price)
 {
-    // ..
+    $product = ProductFactory::new(['average_rating' => $averageRating])->create();
+
+    OptionFactory::new()->create(['product_id' => $product->id]);
+
+    VariantFactory::new(['price' => $price, 'product_id' => $product->id])->create();
+
+    return $product;
 }
