@@ -41,3 +41,32 @@ it('paginates the results', function ($productCount, $perPage) {
     [35, 10],
 ]);
 
+it('filters products by average rating', function () {
+    createProductWithDetails(4.5, 100);
+    createProductWithDetails(4.5, 100);
+    createProductWithDetails(3.5, 100);
+
+    $response = $this->getJson(route('products.index', ['average_rating' => 4.5]));
+
+    $response->assertOk();
+    $response->assertJsonCount(2, 'data');
+    $response->assertJsonPath('data.0.average_rating', 4.5);
+    $response->assertJsonPath('data.1.average_rating', 4.5);
+
+});
+
+
+
+it('filters products by max price', function () {
+    createProductWithDetails(5.0, 50, 5);
+    createProductWithDetails(5.0, 150);
+
+    $response = $this->getJson(route('products.index', ['max_price' => 100]));
+
+    $response->assertOk();
+    $response->assertJsonCount(1, 'data');
+    $response->assertJsonCount(5, 'data.0.variants');
+    $response->assertJsonPath('data.0.variants.0.price', 50);
+});
+
+

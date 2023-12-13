@@ -49,13 +49,13 @@ expect()->extend('toBeOne', function () {
 */
 
 
-function createProductWithDetails($averageRating, $price)
+function createProductWithDetails($averageRating, $price, $variantCount = 1)
 {
     $product = ProductFactory::new(['average_rating' => $averageRating])->create();
 
     OptionFactory::new()->create(['product_id' => $product->id]);
 
-    VariantFactory::new(['price' => $price, 'product_id' => $product->id])->create();
+    VariantFactory::new(['price' => $price, 'product_id' => $product->id])->count($variantCount)->create();
 
     return $product;
 }
