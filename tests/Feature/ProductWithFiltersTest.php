@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Product;
+use Database\Factories\VariantFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 
@@ -97,4 +98,14 @@ describe('Filter with Options', function () {
         $color_values = data_get($response->json(), 'data.0.options.1.values', []);
         expect(in_array('red', $color_values))->toBeTrue();
     });
+});
+
+it('returns the correct default variant based on the lowest price', function () {
+    $product = Product::factory()->create();
+    $higherPricedVariant = VariantFactory::new(['price' => 200, 'product_id' => $product->id])->create();
+    $lowerPricedVariant = VariantFactory::new(['price' => 100, 'product_id' => $product->id])->create();
+    $mediumPricedVariant = VariantFactory::new(['price' => 150, 'product_id' => $product->id])->create();
+
+    $defaultVariant = $product->default_variant;
+    expect($defaultVariant->id)->toBe($lowerPricedVariant->id);
 });
