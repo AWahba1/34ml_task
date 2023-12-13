@@ -49,11 +49,21 @@ expect()->extend('toBeOne', function () {
 */
 
 
-function createProductWithDetails($averageRating, $price, $variantCount = 1)
+function createProductWithDetails($averageRating, $price, $variantCount = 1, $options = [])
 {
     $product = ProductFactory::new(['average_rating' => $averageRating])->create();
 
-    OptionFactory::new()->create(['product_id' => $product->id]);
+    if ($options) {
+        foreach ($options as $optionName => $optionValues) {
+            OptionFactory::new()->create([
+                'product_id' => $product->id,
+                'name' => $optionName,
+                'values' => $optionValues,
+            ]);
+        }
+    } else {
+        OptionFactory::new()->create(['product_id' => $product->id]);
+    }
 
     VariantFactory::new(['price' => $price, 'product_id' => $product->id])->count($variantCount)->create();
 

@@ -34,8 +34,8 @@ it('paginates the results', function ($productCount, $perPage) {
     $expectedLastPage = ceil($productCount / $perPage);
     expect($lastPageNumber)->toEqual($expectedLastPage);
 })->with([
-    [15, 5],  
-    [20, 10], 
+    [15, 5],
+    [20, 10],
     [21, 10],
     [34, 10],
     [35, 10],
@@ -52,13 +52,12 @@ it('filters products by average rating', function () {
     $response->assertJsonCount(2, 'data');
     $response->assertJsonPath('data.0.average_rating', 4.5);
     $response->assertJsonPath('data.1.average_rating', 4.5);
-
 });
 
 
 
 it('filters products by max price', function () {
-    createProductWithDetails(5.0, 50, 5);
+    createProductWithDetails(5.0, 50, variantCount: 5);
     createProductWithDetails(5.0, 150);
 
     $response = $this->getJson(route('products.index', ['max_price' => 100]));
@@ -70,3 +69,32 @@ it('filters products by max price', function () {
 });
 
 
+describe('Filter with Options', function () {
+
+    beforeEach(function () {
+        createProductWithDetails(5.0, 100, options: ['size' => ['small', 'medium'], 'color' => ['blue', 'green']]);
+        createProductWithDetails(1.9, 80, options: ['size' => ['small', 'medium', 'large'], 'color' => ['red', 'green', 'blue']]);
+        createProductWithDetails(3.4, 70, options: ['size' => ['small', 'medium', 'large']]);
+        createProductWithDetails(3.4, 70, options: ['color' => ['red']]);
+    });
+
+
+    it('returns products filtered by a single option', function () {
+        $response = $this->get(route('products.index', ['options' => 'red']));
+        $response->assertOk();
+        $response->assertJsonCount(2, 'data');
+        $values = data_get($response->json(), 'data.0.options.1.values', []);
+        expect(in_array('red', $values))->toBeTrue();
+    });
+
+    it('returns products filtered by multiple options', function () {
+        $response = $this->getJson(route('products.index', ['options' => 'red,small']));
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $size_values = data_get($response->json(), 'data.0.options.0.values', []);
+        expect(in_array('small', $size_values))->toBeTrue();
+
+        $color_values = data_get($response->json(), 'data.0.options.1.values', []);
+        expect(in_array('red', $color_values))->toBeTrue();
+    });
+});
