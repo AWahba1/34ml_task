@@ -4,6 +4,8 @@ use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Product;
+use App\Events\ProductOutOfStock;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,3 +18,14 @@ use App\Models\Product;
 */
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+
+Route::get('/test-outofstock-event', function () {
+    $product = Product::first();
+
+    if ($product) {
+        event(new ProductOutOfStock($product));
+        return 'Event fired and email sent!';
+    }
+
+    return 'No product found to test with.';
+});
