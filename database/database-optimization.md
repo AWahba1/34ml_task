@@ -22,3 +22,8 @@ The following is an Entity-Relationship Diagram (ERD) of the proposed design:
 - **Product:** Represents a generic or abstract product, like a T-shirt.
 - **Option Table:** It now contains name-value pairs instead of a list of values for each row. Sample entries could include: (size, small), (size, large), (material, cotton), (material, wool), (color, red), (brand, GAP), (brand, Levi's) etc.
 - **Variant Table:** Intermediary/Pivot table modelling the many-to-many relationship between Product and Option. It includes variant-specific information like price, stock, and title (e.g., "Red Small Polo Shirt made of Cotton").
+
+## Advantages
+- Promotes reusability, avoids data redundancy and optimizes storage as options would be reusable now if the same options are used with multiple products.
+- Easily expandable as now variants are not tightly coupled to only 2 options.
+- Easier to understand and not as ambigious.
