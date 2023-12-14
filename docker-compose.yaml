@@ -1,9 +1,5 @@
 version: '3'
 
-networks: 
-    laravel:
-        driver: bridge
-
 services: 
     nginx:
         image: nginx:alpine
@@ -18,8 +14,6 @@ services:
         depends_on: 
             - php
             - mysql
-        networks: 
-            - laravel
 
     mysql:
         platform: linux/amd64
@@ -38,8 +32,22 @@ services:
             MYSQL_ROOT_PASSWORD: root
             SERVICE_TAGS: dev
             SERVICE_NAME: mysql
-        networks: 
-            - laravel
+
+    mysql-test:
+        platform: linux/amd64
+        image: mysql
+        container_name: mysql-test
+        restart: unless-stopped
+        tty: true
+        volumes: 
+            - ./mysql-test:/var/lib/mysql
+        environment: 
+            MYSQL_DATABASE: test
+            MYSQL_USER: user
+            MYSQL_PASSWORD: user
+            MYSQL_ROOT_PASSWORD: root
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
 
     php:
         build:
@@ -54,5 +62,3 @@ services:
         depends_on:
             - mysql
         entrypoint: ["/bin/sh", "-c", "sleep 15 && php artisan migrate --force --seed && php-fpm"]
-        networks: 
-            - laravel
