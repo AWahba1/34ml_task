@@ -58,4 +58,5 @@ php artisan test
 ### Future Enhancements
 
 - Include a Makefile to start up the app and run tests.
+- Wait for database to start up dynamically instead of waiting for hard coded time.
 - Use proposed database schema [here](/database/database-optimization.md).
