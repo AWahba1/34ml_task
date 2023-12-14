@@ -117,6 +117,79 @@ it('returns the correct default variant based on the lowest price', function () 
     expect($defaultVariant->id)->toBe($lowerPricedVariant->id);
 });
 
+describe('Filters with multiple combinations', function () {
+    it('filters products by average rating and max price', function () {
+        createProductWithDetails(4.5, 80);
+        createProductWithDetails(4.5, 120);
+        createProductWithDetails(3.5, 100);
+
+        $response = $this->getJson(route('products.index', [
+            'average_rating' => 4.5,
+            'max_price' => 100
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.average_rating', 4.5);
+        $response->assertJsonPath('data.0.variants.0.price', 80);
+    });
+
+    it('filters products by average rating and options', function () {
+        createProductWithDetails(4.5, 100, options: ['color' => ['red']]);
+        createProductWithDetails(4.5, 100, options: ['color' => ['blue']]);
+        createProductWithDetails(3.5, 100, options: ['color' => ['red']]);
+
+        $response = $this->getJson(route('products.index', [
+            'average_rating' => 4.5,
+            'options' => 'red'
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.average_rating', 4.5);
+        $values = data_get($response->json(), 'data.0.options.0.values', []);
+        expect(in_array('red', $values))->toBeTrue();
+    });
+
+    it('filters products by max price and options', function () {
+        createProductWithDetails(5.0, 50, options: ['size' => ['small']]);
+        createProductWithDetails(5.0, 150, options: ['size' => ['large']]);
+
+        $response = $this->getJson(route('products.index', [
+            'max_price' => 100,
+            'options' => 'small'
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.variants.0.price', 50);
+        $values = data_get($response->json(), 'data.0.options.0.values', []);
+        expect(in_array('small', $values))->toBeTrue();
+    });
+
+    it('filters products by average rating, max price, and options', function () {
+        createProductWithDetails(4.5, 80, options: ['color' => ['red'], 'size' => ['small', 'large']]);
+        createProductWithDetails(4.5, 120, options: ['color' => ['blue']]);
+        createProductWithDetails(3.5, 100, options: ['color' => ['red']]);
+
+        $response = $this->getJson(route('products.index', [
+            'average_rating' => 4.5,
+            'max_price' => 100,
+            'options' => 'red,small'
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.variants.0.price', 80);
+        $response->assertJsonPath('data.0.average_rating', 4.5);
+        $color_values = data_get($response->json(), 'data.0.options.0.values', []);
+        $size_values = data_get($response->json(), 'data.0.options.1.values', []);
+        expect(in_array('small', $size_values))->toBeTrue();
+        expect(in_array('red', $color_values))->toBeTrue();
+    });
+});
+
+
 
 it('fires ProductOutOfStock event and sends an email', function () {
 
