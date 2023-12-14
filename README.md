@@ -51,7 +51,7 @@ curl -X GET http://localhost:8001/api/products?page=1&per_page=10
 
 ### Running Tests
 ```bash
-docker exec -it php /bin/sh
+docker exec -it php //bin//sh
 php artisan test
 ```
 
