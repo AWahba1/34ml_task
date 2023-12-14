@@ -3,7 +3,14 @@
 use App\Models\Product;
 use Database\Factories\VariantFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\Fluent\AssertableJson;
+use App\Events\ProductOutOfStock;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Message;
+use App\Mail\OutOfStockNotification;
+use App\Listeners\SendOutOfStockNotification;
+
+
 
 uses(RefreshDatabase::class);
 
@@ -108,4 +115,30 @@ it('returns the correct default variant based on the lowest price', function () 
 
     $defaultVariant = $product->default_variant;
     expect($defaultVariant->id)->toBe($lowerPricedVariant->id);
+});
+
+
+it('fires ProductOutOfStock event and sends an email', function () {
+
+    Event::fake();
+    Mail::fake();
+    $product = Product::factory()->create();
+
+    // Testing event firing
+    $event = new ProductOutOfStock($product);
+    event($event);
+
+    Event::assertDispatched(ProductOutOfStock::class, function ($event) use ($product) {
+        return $event->product->id === $product->id;
+    });
+
+    // Test sending email upon event handling
+    $listener = new SendOutOfStockNotification();
+    $listener->handle($event);
+
+    $adminEmail = env('ADMIN_EMAIL_ADDRESS');
+    Mail::assertSent(OutOfStockNotification::class, function ($mail) use ($adminEmail, $product) {
+        return $mail->product->id === $product->id
+            && $mail->hasTo($adminEmail);
+    });
 });
