@@ -1,24 +1,53 @@
-# Current Schema Problems
 
-## Products Table
-1. The `average_rating` column alone is insufficient. To accurately recalculate the average rating with each new user rating, it should be accompanied by a `total_ratings` column.
-2. The `is_in_stock` column is redundant. Users interact with product variants rather than the product as a whole. This column can easily become outdated if not synchronized with the addition or removal of variants.
+# E-Commerce
 
+## Overview
 
-## Variants Table
-1. The `is_in_stock` column is unnecessary since the stock can be inferred from the stock quantity directly. This redundancy can lead to data inconsistencies without proper synchronization.
-2. Storing `options` in both the Variants and Products tables is suboptimal, particularly as options are strings unrelated to the Options table.
-
-## Options Table
-- Storing option values as a list promotes value repetition across the table, which can hinder scalability and lead to data inconsistencies. For example, multiple entries in the Options table might have the same name and value list if multiple products share the same size options.
+An e-commerce website to buy and sell products to customers.
 
 
-## Proposed Schema
+## Installation
 
-The following is an Entity-Relationship Diagram (ERD) of the proposed design:
 
-![ERD Diagram](image.png)
+### Prerequisites
 
-- **Product:** Represents a generic or abstract product, like a Polo T-shirt.
-- **Option Table:** It now contains name-value pairs instead of a list of values for each row. Sample entries could include: (size, small), (size, large), (material, cotton), (material, wool), (color, red), etc.
-- **Variant Table:** Models the many-to-many relationship between Product and Option. It includes variant-specific information like price, stock, and title (e.g., "Red Small Polo Shirt made of Cotton").
+- Docker
+- Docker Compose
+
+### Setup
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/AWahba1/34ml_task.git
+   cd 34ml_task
+
+2. **Environment Configuration**
+First, copy the example environment file. Then, open the `.env` file and update it with your environment-specific variables, including the mail configuration.
+
+   ```bash
+   cp .env.example .env
+
+3. **Build and Run Docker**
+   ```bash
+    docker-compose up --build -d
+
+## Usage
+
+### Making API Requests
+
+To interact with the API, you can use `curl` commands. Here's an example of how to make a GET request to retrieve all products:
+```
+curl -X GET http://localhost:8001/api/products
+```
+
+### Running Tests
+```bash
+docker exec -it php /bin/sh
+php artisan test
+```
+
+### Future Enhancements
+
+- Include a Makefile to start up the app and run tests.
+- Use proposed database schema [here](/database/database-optimization.md).
