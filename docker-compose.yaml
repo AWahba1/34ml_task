@@ -49,9 +49,10 @@ services:
         restart: unless-stopped
         tty: true
         working_dir: /var/www/app
-        volumes: 
-            - ./:/var/www/app
         ports: 
             - "9000:9000"
+        depends_on:
+            - mysql
+        entrypoint: ["/bin/sh", "-c", "sleep 15 && php artisan migrate --force --seed && php-fpm"]
         networks: 
             - laravel
