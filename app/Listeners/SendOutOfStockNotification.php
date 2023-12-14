@@ -8,6 +8,8 @@ use Illuminate\Queue\InteractsWithQueue;
 
 use App\Mail\ProductOutOfStockMail;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\OutOfStockNotification;
+
 
 class SendOutOfStockNotification
 {
@@ -27,9 +29,6 @@ class SendOutOfStockNotification
         $product = $event->product;
         $adminEmail = env('ADMIN_EMAIL_ADDRESS', 'admin@34ml.com');
 
-        Mail::raw("The {$product->title} product is now out of stock.", function ($message) use ($adminEmail) {
-            $message->to($adminEmail)
-                    ->subject('Product Out of Stock Notification');
-        });
+        Mail::to($adminEmail)->send(new OutOfStockNotification($product));
     }
 }
